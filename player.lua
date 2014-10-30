@@ -1,11 +1,16 @@
 player = {} --CREATE PLAYER TABLE
 
 function player.load( )
-	-- [Player Graphics and Positions]
+	-- [Player Graphics]
 	player.sprite = love.graphics.newImage( "char/hughes/stand.png" )
 	player.facing = "right"
+
+	-- [Player Position and Movement]
+	player.state = 'idle'
 	player.x = 50
 	player.y = 215
+	player.velX = 0
+	player.velY = 0
 
 	-- [Player Stats]
 	player.speed = 255
@@ -14,6 +19,8 @@ function player.load( )
 	player.attack = 2 -- out of 3. where 1 is weak, 2 is well average, and 3 is strong.
 	player.defense = 2 -- ditto^
 
+	-- [ Temp constants and variables (for dev)]
+	gravity = 0.2
 
 	--player.hitbox_x = player.x + 12
 	--player.hitbox_y = player.y + 12
@@ -28,7 +35,11 @@ end
 
 function player.update( dt )
 	if love.keyboard.isDown( "up" ) then
-		--
+		if player.state ~= 'jumping' then
+			player.state = 'jumping'
+		elseif player.state == 'jumping' then
+			-- jump
+		end 
 	end
 	if love.keyboard.isDown( "down" ) then
 		--
