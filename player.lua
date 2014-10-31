@@ -11,6 +11,8 @@ function player.load( )
 	player.y = 215
 	player.velX = 0
 	player.velY = 0
+	player.accX = 0
+	player.accY = 0
 
 	-- [Player Stats]
 	player.speed = 255
@@ -20,7 +22,7 @@ function player.load( )
 	player.defense = 2 -- ditto^
 
 	-- [ Temp constants and variables (for dev)]
-	gravity = 0.2
+	player.gravity = 120
 
 	--player.hitbox_x = player.x + 12
 	--player.hitbox_y = player.y + 12
@@ -37,8 +39,23 @@ function player.update( dt )
 	if love.keyboard.isDown( "up" ) then
 		if player.state ~= 'jumping' then
 			player.state = 'jumping'
+			player.velY = 225
 		elseif player.state == 'jumping' then
 			-- jump
+
+			--apply gravity
+			player.accY = player.accY - ( player.gravity * dt )
+
+			--update velocity
+			player.velY = player.velY + ( player.accY * dt )
+
+			--update position
+			player.y = player.y - player.velY * dt
+
+			if player.y >= 215 then
+				player.state = 'idle'
+			end
+
 		end 
 	end
 	if love.keyboard.isDown( "down" ) then
