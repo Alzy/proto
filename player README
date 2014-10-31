@@ -1,5 +1,6 @@
-[ Possible states ]
-	- Player states (player.state) holds the current state of the player. For conditional moves. 
+[ Possible States ]
+
+Player states (player.state) holds the current state of the player. For conditional moves. 
 
 idle
 jumping
@@ -7,6 +8,7 @@ falling
 hit
 attacking
 blocking
+
 
 [ Player Speeds ]
 

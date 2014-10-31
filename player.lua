@@ -33,8 +33,9 @@ function player.draw( )
 	player.sprite = player.sprite
 	love.graphics.draw ( player.sprite, player.x, player.y )
 
+	-- [ Dev Player info ]
 	love.graphics.printf( player.state, 10, 10, 150, 'left' )
-	love.graphics.printf( "facing:  " .. player.facing, 300, 10, 150, 'left' )
+	love.graphics.printf( "facing:  " .. player.facing, 500, 10, 150, 'left' )
 	love.graphics.printf( "velocity:  " .. player.velY, 10, 30, 550, 'left' )
 	love.graphics.printf( "acceleration:  " .. player.accY, 10, 50, 550, 'left' )
 	love.graphics.printf( "speed:  " .. player.speed, 10, 70, 550, 'left' )
@@ -42,6 +43,8 @@ function player.draw( )
 end
 
 function player.update( dt )
+
+	-- [ Keyboard Input ]
 	if love.keyboard.isDown( "up" ) then
 		if player.state ~= 'jumping' then
 			player.state = 'jumping'
@@ -49,7 +52,7 @@ function player.update( dt )
 		end
 	end
 	if love.keyboard.isDown( "down" ) then
-		player.velY = player.velY - 50
+		player.velY = player.velY - 25
 	end
 	if love.keyboard.isDown( "left" ) then
 		player.x = player.x - ( player.speed * dt )
@@ -64,33 +67,26 @@ function player.update( dt )
 			player.facing = "right"
 		end
 	end
-	--player.hitbox:moveTo( player.hitbox_x, player.hitbox_y)
+
+	-- [Joystick Input]
+	--player.speed =  350 * joystick:getAxis(1)
+
 
 	-- [Plater State Resolve]
 	if player.state == "idle" then
-			player.velY = 0
-			player.accY = 0
-			player.speed = 350
+		player.velY = 0
+		player.accY = 0
+		player.speed = 350
 	end
 
 	if player.state == 'jumping' then
 		-- jump
-
 		--apply gravity
 		player.accY = player.accY - ( player.gravity * dt )
-
 		--update velocity
 		player.velY = player.velY + ( player.accY * dt )
-
 		--update position
 		player.y = player.y - player.velY * dt
-
-		if player.y >= 215 then
-			player.state = 'idle'
-			player.velY = 0
-			player.accY = 0
-			player.speed = 350
-		end
 
 		-- back jump resistance
 		if love.keyboard.isDown( "left" ) and player.facing == "right" then
@@ -100,5 +96,13 @@ function player.update( dt )
 			player.speed = 200
 		end
 
+		-- reset to idle
+		if player.y >= 215 then
+			player.state = 'idle'
+		end
+
 	end 
+
+	-- [ Hitbox Position and Movement ]
+	--player.hitbox:moveTo( player.hitbox_x, player.hitbox_y)
 end
