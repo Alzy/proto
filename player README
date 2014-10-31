@@ -7,3 +7,10 @@ falling
 hit
 attacking
 blocking
+
+[ Player Speeds ]
+
+walking: 200
+running: 255
+sprinting: 325
+s sprint: 350
