@@ -1,5 +1,5 @@
 --HC = require "hardoncollider"
-require "player"
+require "player2"
 
 function love.load(  )
 	SCREEN_WIDTH = love.graphics.getWidth()
@@ -19,7 +19,7 @@ function love.load(  )
 
 
 	--LOAD TABLES
-	player.load()
+	player:load()
 
 	--LOAD BG
 	bgLayer0 = love.graphics.newImage("bg/bg.jpg")
@@ -29,14 +29,14 @@ function love.draw(  )
 
 	--graphics
     love.graphics.draw(bgLayer0, 0, 0)
-	player.draw()
+	player:draw()
 	
 	-- vJoy dev info
 	love.graphics.printf( "joysticks:  " .. love.joystick.getJoystickCount(), 10, 300, 550, 'left' )
 
     love.graphics.printf(joystick:getName(), 10, 320, 550, "left" )
     
-    if joystick:isGamepad() == true then love.graphics.printf("gamepad", 50, (i * 20) + 300, 550, "left" ) end
+    --if joystick:isGamepad() == true then love.graphics.printf("gamepad", 50, (i * 20) + 300, 550, "left" ) end
     -- C = count
     love.graphics.printf( "Axis C:  " .. joystick:getAxisCount(), 10 , 340, 550, "left" )
     love.graphics.printf( "Axis X:  " .. math.floor( 100 * joystick:getAxis(1) ) .. '%', 100 , 340, 100, "left" )
@@ -44,10 +44,7 @@ function love.draw(  )
 end
 
 function love.update ( dt )
-	player.update( dt )
+	player:update( dt )
 	--Collider:update( dt )
 end
 
-function love.textinput(t)
-	text = text .. t
-end

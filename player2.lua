@@ -2,6 +2,9 @@
 -- purpose: allow inheritance.
 
 player = {
+	-- [Player Info]
+	far,
+
 	-- [Player Graphics]
 	sprite,
 	facing,
@@ -21,12 +24,30 @@ player = {
 	attack,
 	defense,
 
+	-- [Helpers]
+	charsheet,
+
 	-- temp variables
 	gravity
 
 } --CREATE PLAYER TABLE
 
 function player:load( )
+	-- [Load Character Sheet]
+	self.charsheet = love.filesystem.newFile("char/hughes/char")
+	self.charsheet:open("r")
+	-- parse file
+	for line in self.charsheet:lines() do
+		if line:sub(1,1) == "#" then
+			-- do nothing
+		else
+			--
+		end
+	end
+
+	-- [Player Info]
+	self.name = "far"
+
 	-- [Player Graphics]
 	self.sprite = love.graphics.newImage( "char/hughes/stand.png" )
 	self.facing = "right"
@@ -47,8 +68,11 @@ function player:load( )
 	self.attack = 2 -- out of 3. where 1 is weak, 2 is well average, and 3 is strong.
 	self.defense = 2 -- ditto^
 
-	-- [ Temp constants and variables (for dev)]
-	self.gravity = 2500
+	-- [Temp constants and variables (for dev)]
+	self.gravity = 4125
+
+	-- [Load Moveset]
+	require "char/hughes/moves"
 
 	--self.hitbox_x = self.x + 12
 	--self.hitbox_y = self.y + 12
@@ -69,7 +93,78 @@ function player:draw( )
 end
 
 function player:update( dt )
+	-- [ Joystick Motion ]
+	self.speed =  350 * joystick:getAxis(1)
+	if joystick:getAxis(2) < -0.79 then --up
+		if self.state ~= 'jumping' and self.state ~= 'falling' then
+			self.state = 'jumping'
+			self.velY = 575  -- must be variable per character
+		end
+	end
+	if joystick:getAxis(2) > 0.65 then --down
+		self.velY = self.velY - 55
+	end
+	if joystick:getAxis(1) < 0 then --left
+		self.x = self.x + ( self.speed * dt )
+		if self.state ~= "jumping" and self.state ~= 'falling' then
+			self.facing = "left"
+		end
 
+	end
+	if joystick:getAxis(1) > 0 then --right
+		self.x = self.x + ( self.speed * dt )
+		if self.state ~= "jumping" and self.state ~= 'falling' then	
+			self.facing = "right"
+		end
+	end
+
+	-- [Joystick Input]
+	
+
+
+	-- [Player State Resolve]
+	if self.state == "idle" then
+		self.velY = 0
+		self.accY = 0
+		--self.speed = 350
+	end
+
+	if self.state == 'jumping' or self.state == 'falling' then
+		-- jump
+		local prevPosition = self.y
+		--apply gravity
+		self.accY = self.accY - ( self.gravity * dt )
+		--update velocity
+		self.velY = self.velY + ( self.accY * dt )
+		--update position
+		self.y = self.y - self.velY * dt
+
+		-- back jump resistance
+		if joystick:getAxis(1) < 0 and self.facing == "right" then
+			self.speed = 7
+		end
+		if joystick:getAxis(1) > 0 and self.facing == "left" then
+			self.speed = 7
+		end
+
+		if self.y > prevPosition then
+			self.state = 'falling'
+		end
+
+		-- reset to idle
+		if self.y >= 215 then
+			self.accY = 0
+			self.velY = 0
+			self.state = 'idle'
+		end
+
+	end 
+
+	-- [ Hitbox Position and Movement ]
+	--self.hitbox:moveTo( self.hitbox_x, self.hitbox_y)
+end
+
+function player:keyboard()
 	-- [ Keyboard Input ]
 	if love.keyboard.isDown( "up" ) then
 		if self.state ~= 'jumping' then
@@ -94,15 +189,11 @@ function player:update( dt )
 		end
 	end
 
-	-- [Joystick Input]
-	--self.speed =  350 * joystick:getAxis(1)
-
-
-	-- [Player State Resolve]
+		-- [Player State Resolve]
 	if self.state == "idle" then
 		self.velY = 0
 		self.accY = 0
-		self.speed = 350
+		--self.speed = 350
 	end
 
 	if self.state == 'jumping' then
@@ -116,10 +207,10 @@ function player:update( dt )
 
 		-- back jump resistance
 		if love.keyboard.isDown( "left" ) and self.facing == "right" then
-			self.speed = 200
+			self.speed = 10
 		end
 		if love.keyboard.isDown( "right" ) and self.facing == "left" then
-			self.speed = 200
+			self.speed = 10
 		end
 
 		-- reset to idle
@@ -131,6 +222,5 @@ function player:update( dt )
 
 	end 
 
-	-- [ Hitbox Position and Movement ]
-	--self.hitbox:moveTo( self.hitbox_x, self.hitbox_y)
+	-- body
 end

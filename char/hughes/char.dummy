@@ -1,0 +1,23 @@
+# Character Variable Sheet
+#
+# Creating a character starts here. This file contains all variables variable per character.  <-lol
+# DO NOT remove an entry. Comment lines are #. assignment is done with =, left side is name, right side is value.
+
+
+# [Stats]
+
+name = far
+hp = 1000
+energy = 500000
+
+# [Attacks]
+
+{
+	name: super beam
+	combo: up, down + mpunch
+	frames: 5
+	energy: 15
+	blockreturn: 13
+	animation: superbeam.jpg
+
+}

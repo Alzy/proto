@@ -1,0 +1,21 @@
+# Character Variable Sheet
+#
+# Creating a character starts here. This file contains all variables variable per character.  <-lol
+# DO NOT remove an entry. Comment lines are #. assignment is done with =, left side is name, right side is value.
+
+
+# [Player Info]
+name = far
+
+
+
+# [Stats]
+speed = 350
+hp = 1000
+energy = 500000
+attack = 2
+defense = 2
+
+# [Movements]
+jumpVel = 575
+quickFallSpd = 
