@@ -98,6 +98,8 @@ function player.update( dt )
 
 		-- reset to idle
 		if player.y >= 215 then
+			player.velY = 0
+			player.accY = 0
 			player.state = 'idle'
 		end
 

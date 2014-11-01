@@ -2,11 +2,11 @@
 -- purpose: allow inheritance.
 
 player = {
-	-- [self Graphics]
+	-- [Player Graphics]
 	sprite,
 	facing,
 	
-	-- [self Position and Movement]
+	-- [Player Position and Movement]
 	x,
 	y,
 	velX,
@@ -14,7 +14,7 @@ player = {
 	accX,
 	accY,
 
-	-- [self Stats]
+	-- [Player Stats]
 	speed,
 	hp,
 	energy,
@@ -124,6 +124,8 @@ function player:update( dt )
 
 		-- reset to idle
 		if self.y >= 215 then
+			self.accY = 0
+			self.velY = 0
 			self.state = 'idle'
 		end
 
