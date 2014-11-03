@@ -7,15 +7,12 @@
 # [Player Info]
 name = far
 
-
-
 # [Stats]
 speed = 350
 hp = 1000
-energy = 500000
+energy = 5000
 attack = 2
 defense = 2
 
 # [Movements]
 jumpVel = 575
-quickFallSpd = 

@@ -3,7 +3,7 @@
 
 player = {
 	-- [Player Info]
-	far,
+	name,
 
 	-- [Player Graphics]
 	sprite,
@@ -26,6 +26,7 @@ player = {
 
 	-- [Helpers]
 	charsheet,
+	charSheetArray,
 
 	-- temp variables
 	gravity
@@ -36,17 +37,23 @@ function player:load( )
 	-- [Load Character Sheet]
 	self.charsheet = love.filesystem.newFile("char/hughes/char")
 	self.charsheet:open("r")
+	self.charSheetArray = {}
 	-- parse file
 	for line in self.charsheet:lines() do
 		if line:sub(1,1) == "#" then
 			-- do nothing
 		else
-			--
+			-- remove whitespace from string
+			line = line:gsub("%s+", "")
+			if line:find("=") ~= nil then
+				-- populate array  ( Character["name"] = far )
+				self.charSheetArray[line:sub( 1, line:find("=")-  1 )] = line:sub(line:find("=") + 1)
+			end
 		end
 	end
 
 	-- [Player Info]
-	self.name = "far"
+	self.name = self.charSheetArray["name"]
 
 	-- [Player Graphics]
 	self.sprite = love.graphics.newImage( "char/hughes/stand.png" )
@@ -62,11 +69,11 @@ function player:load( )
 	self.accY = 0
 
 	-- [Player Stats]
-	self.speed = 350
-	self.hp = 1000
-	self.energy = 5000
-	self.attack = 2 -- out of 3. where 1 is weak, 2 is well average, and 3 is strong.
-	self.defense = 2 -- ditto^
+	self.speed = tonumber(self.charSheetArray["speed"])
+	self.hp = tonumber(self.charSheetArray["hp"])
+	self.energy = tonumber(self.charSheetArray["energy"])
+	self.attack = tonumber(self.charSheetArray["attack"]) -- out of 3. where 1 is weak, 2 is well average, and 3 is strong.
+	self.defense = tonumber(self.charSheetArray["defense"]) -- ditto^
 
 	-- [Temp constants and variables (for dev)]
 	self.gravity = 4125
@@ -80,25 +87,32 @@ function player:load( )
 end
 
 function player:draw( )
+	-- [Player Sprite]
 	self.sprite = self.sprite
 	love.graphics.draw ( self.sprite, self.x, self.y )
 
-	-- [ Dev Player info ]
+	-- [ Dev Player Stats ]
 	love.graphics.printf( self.state, 10, 10, 150, 'left' )
-	love.graphics.printf( "facing:  " .. self.facing, 500, 10, 150, 'left' )
 	love.graphics.printf( "velocity:  " .. self.velY, 10, 30, 550, 'left' )
 	love.graphics.printf( "acceleration:  " .. self.accY, 10, 50, 550, 'left' )
 	love.graphics.printf( "speed:  " .. self.speed, 10, 70, 550, 'left' )
+
+	-- [Dev Player Info : right side ]
+	love.graphics.printf( "name :  " .. self.name, 550, 10, 150, 'left' )
+	love.graphics.printf( "facing:  " .. self.facing, 550, 30, 150, 'left' )
+	love.graphics.printf( "HP:  " .. self.hp, 550, 50, 150, 'left' )
+	love.graphics.printf( "Energy:  " .. self.energy, 550, 70, 150, 'left' )
+	self:attack("punch -w")
 	-- self.hitbox:draw("fill")
 end
 
 function player:update( dt )
 	-- [ Joystick Motion ]
-	self.speed =  350 * joystick:getAxis(1)
+	self.speed =  tonumber(self.charSheetArray["speed"]) * joystick:getAxis(1)
 	if joystick:getAxis(2) < -0.79 then --up
 		if self.state ~= 'jumping' and self.state ~= 'falling' then
 			self.state = 'jumping'
-			self.velY = 575  -- must be variable per character
+			self.velY = tonumber(self.charSheetArray["jumpVel"])  -- must be variable per character
 		end
 	end
 	if joystick:getAxis(2) > 0.65 then --down
@@ -126,7 +140,7 @@ function player:update( dt )
 	if self.state == "idle" then
 		self.velY = 0
 		self.accY = 0
-		--self.speed = 350
+		--self.speed = tonumber(self.charSheetArray["speed"])
 	end
 
 	if self.state == 'jumping' or self.state == 'falling' then
@@ -159,6 +173,7 @@ function player:update( dt )
 		end
 
 	end 
+
 
 	-- [ Hitbox Position and Movement ]
 	--self.hitbox:moveTo( self.hitbox_x, self.hitbox_y)
