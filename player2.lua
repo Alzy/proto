@@ -106,7 +106,7 @@ function player:draw( )
 	love.graphics.printf( "facing:  " .. self.facing, 550, 30, 150, 'left' )
 	love.graphics.printf( "HP:  " .. self.hp, 550, 50, 150, 'left' )
 	love.graphics.printf( "Energy:  " .. self.energy, 550, 70, 150, 'left' )
-	love.graphics.printf( self.moveQueue[0], 550, 100, 150, 'left' )
+	love.graphics.printf( self.moveQueue[10], 550, 100, 150, 'left' )
 	-- self.hitbox:draw("fill")
 end
 
@@ -255,11 +255,12 @@ function player.moveQueue:load()
 end
 
 function player.moveQueue:push( action )
-	for i = 0, self.last - 1 do 
-		self[i + 1] = self[i]	
+	if( action ~= nil ) then
+		for i = 0, self.last - 1 do 
+			self[i + 1] = self[i]	
+		end
+			self[0] = action
 	end
-		self[0] = action
-	-- body
 end
 
 function player.moveQueue:pop( number )
