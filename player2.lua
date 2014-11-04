@@ -27,6 +27,7 @@ player = {
 	-- [Helpers]
 	charsheet,
 	charSheetArray,
+	moveQueue = { first = 0, last = 10 },
 
 	-- temp variables
 	gravity
@@ -81,6 +82,9 @@ function player:load( )
 	-- [Load Moveset]
 	require "char/hughes/moves"
 
+	-- [Load Queue]
+	self.moveQueue:load()
+
 	--self.hitbox_x = self.x + 12
 	--self.hitbox_y = self.y + 12
 	--self.hitbox = Collider:addRectangle( self.hitbox_x, self.hitbox_y, 10, 15 )
@@ -102,7 +106,7 @@ function player:draw( )
 	love.graphics.printf( "facing:  " .. self.facing, 550, 30, 150, 'left' )
 	love.graphics.printf( "HP:  " .. self.hp, 550, 50, 150, 'left' )
 	love.graphics.printf( "Energy:  " .. self.energy, 550, 70, 150, 'left' )
-	self:attack("punch -w")
+	love.graphics.printf( self.moveQueue[0], 550, 100, 150, 'left' )
 	-- self.hitbox:draw("fill")
 end
 
@@ -238,4 +242,31 @@ function player:keyboard()
 	end 
 
 	-- body
+end
+
+
+-- [ MOVEMENT QUEUE FUNCTIONS ]
+
+function player.moveQueue:load()
+	self[0] = "-"
+	for i = 0, self.last do
+		self[i] = "o.o"
+	end
+end
+
+function player.moveQueue:push( action )
+	for i = 0, self.last - 1 do 
+		self[i + 1] = self[i]	
+	end
+		self[0] = action
+	-- body
+end
+
+function player.moveQueue:pop( number )
+	-- probably will not implement as is not necessary (so far)
+end
+
+function player.moveQueue:toString()
+	-- body
+	-- return formatted string ie: "UpDownPunchPunchDownKick" , "UDPPDK"
 end

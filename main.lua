@@ -20,6 +20,7 @@ function love.load(  )
 
 	--LOAD TABLES
 	player:load()
+	player.moveQueue:push()
 
 	--LOAD BG
 	bgLayer0 = love.graphics.newImage("bg/bg.jpg")

@@ -1,3 +1,5 @@
+-- NO LONGER USED.
+
 player = {} --CREATE PLAYER TABLE
 
 function player.load( )
