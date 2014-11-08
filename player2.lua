@@ -12,6 +12,8 @@ player = {
 	playAnimation = false,
 	
 	-- [Player Position and Movement]
+	state,
+	playerState,
 	x,
 	y,
 	velX,
@@ -23,13 +25,14 @@ player = {
 	speed,
 	hp,
 	energy,
-	attack,
 	defense,
 
 	-- [Helpers]
 	charsheet,
 	charSheetArray,
 	moveQueue = { first = 0, last = 10 },
+	action,
+	prevYposition,
 
 	-- temp variables
 	gravity
@@ -66,7 +69,8 @@ function player:load( )
 	self.facing = "right"
 
 	-- [Player Position and Movement]
-	self.state = 'idle'
+	self.state = "idle"
+	self.playerState = "idle"
 	self.x = 50
 	self.y = 215
 	self.velX = 0
@@ -78,8 +82,7 @@ function player:load( )
 	self.speed = tonumber(self.charSheetArray["speed"])
 	self.hp = tonumber(self.charSheetArray["hp"])
 	self.energy = tonumber(self.charSheetArray["energy"])
-	self.attack = tonumber(self.charSheetArray["attack"]) -- out of 3. where 1 is weak, 2 is well average, and 3 is strong.
-	self.defense = tonumber(self.charSheetArray["defense"]) -- ditto^
+	self.defense = tonumber(self.charSheetArray["defense"]) -- out of 3. where 1 is weak, 2 is well average, and 3 is strong.
 
 	-- [Temp constants and variables (for dev)]
 	self.gravity = 4125
@@ -89,6 +92,9 @@ function player:load( )
 
 	-- [Load Queue]
 	self.moveQueue:load()
+
+	-- [ Helpers ]
+	self.prevYposition = self.y
 
 	--self.hitbox_x = self.x + 12
 	--self.hitbox_y = self.y + 12
@@ -145,7 +151,9 @@ function player:update( dt )
 	end
 
 	-- [Joystick Input]
-
+	if joystick:isDown(11) then  -- see "joystick list of button indexs.txt"
+		self.action = "punch -w"
+	end
 
 
 	-- [Player State Resolve]
@@ -155,9 +163,15 @@ function player:update( dt )
 		--self.speed = tonumber(self.charSheetArray["speed"])
 	end
 
+	if self.y > self.prevYposition then
+		self.state = "falling"
+	end
+	if self.prevYposition ~= self.y then
+		self.prevYposition = self.y
+	end
+
 	if self.state == 'jumping' or self.state == 'falling' then
 		-- jump
-		local prevPosition = self.y
 		--apply gravity
 		self.accY = self.accY - ( self.gravity * dt )
 		--update velocity
@@ -172,23 +186,20 @@ function player:update( dt )
 		if joystick:getAxis(1) > 0 and self.facing == "left" then
 			self.speed = 7
 		end
-
-		if self.y > prevPosition then
-			self.state = 'falling'
-		end
-
-		-- reset to idle
-		if self.y >= 215 then
-			self.accY = 0
-			self.velY = 0
-			self.state = 'idle'
-		end
-
 	end 
+		-- reset to idle
+	if self.y >= 215 then
+		self.accY = 0
+		self.velY = 0
+		self.state = 'idle'
+		self.y = 215 -- lol
+	end
 
 	if self.playAnimation == true then
 		self.sprite:update(dt)
 	end
+
+	self:performAction(self.action)
 
 	-- [ Hitbox Position and Movement ]
 	--self.hitbox:moveTo( self.hitbox_x, self.hitbox_y)
@@ -266,12 +277,12 @@ function player.moveQueue:load()
 	end
 end
 
-function player.moveQueue:push( action )
+function player.moveQueue:push( action_ )
 	if( action ~= nil ) then
 		for i = 0, self.last - 1 do 
 			self[i + 1] = self[i]	
 		end
-			self[0] = action
+			self[0] = action_
 	end
 end
 

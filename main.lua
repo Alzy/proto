@@ -61,7 +61,4 @@ function love.keyreleased( key )
 	if key == "escape" then
 		love.event.quit()
 	end
-	if key == "p" then
-		player:attack("punch -w")
-	end
 end

@@ -1,13 +1,13 @@
-function player:attack( attack )
+function player:performAction( action )
 	-- conditional attack launches
-	if attack == "punch -w" then
+	if action == "punch -w" then
 		self:weakPunch(5)
 	end
 
 end
 
 function player:weakPunch( frames )
-	self.state = "attacking"
+	self.playerState = "attacking"
 
 	if self.sprite ~= self.spriteCollection["punching"] then
 		self.sprite = self.spriteCollection["punching"]
@@ -18,9 +18,10 @@ function player:weakPunch( frames )
 	pressed = self.sprite:getCurrentFrame()
 
 	if self.sprite:getCurrentFrame() == 5 then
-		self.sprite:reset()
-		self.state = "idle"
-		self.sprite = self.spriteCollection["idle"]
+		self.playerState = "idle"
 		self.playAnimation = false
-	end 
+		self.sprite:reset()
+		self.sprite = self.spriteCollection["idle"]
+		self.action = "idle"
+	end
 end
