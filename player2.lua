@@ -4,10 +4,12 @@
 player = {
 	-- [Player Info]
 	name,
+	facing,
 
 	-- [Player Graphics]
 	sprite,
-	facing,
+	spriteCollection = {},
+	playAnimation = false,
 	
 	-- [Player Position and Movement]
 	x,
@@ -58,6 +60,9 @@ function player:load( )
 
 	-- [Player Graphics]
 	self.sprite = love.graphics.newImage( "char/hughes/stand.png" )
+	self.spriteCollection["idle"] = self.sprite
+	self.spriteCollection["punching"] = newAnimation(love.graphics.newImage("char/hughes/punching.png"), 100, 120, 0.1, 0)
+	self.spriteCollection["punching"]:setMode("once")
 	self.facing = "right"
 
 	-- [Player Position and Movement]
@@ -92,8 +97,11 @@ end
 
 function player:draw( )
 	-- [Player Sprite]
-	self.sprite = self.sprite
-	love.graphics.draw ( self.sprite, self.x, self.y )
+	if self.playAnimation == false then
+		love.graphics.draw( self.sprite, self.x, self.y )
+	else
+		self.sprite:draw( self.x, self.y )
+	end
 
 	-- [ Dev Player Stats ]
 	love.graphics.printf( self.state, 10, 10, 150, 'left' )
@@ -137,7 +145,7 @@ function player:update( dt )
 	end
 
 	-- [Joystick Input]
-	
+
 
 
 	-- [Player State Resolve]
@@ -178,6 +186,9 @@ function player:update( dt )
 
 	end 
 
+	if self.playAnimation == true then
+		self.sprite:update(dt)
+	end
 
 	-- [ Hitbox Position and Movement ]
 	--self.hitbox:moveTo( self.hitbox_x, self.hitbox_y)
@@ -240,6 +251,7 @@ function player:keyboard()
 		end
 
 	end 
+
 
 	-- body
 end
