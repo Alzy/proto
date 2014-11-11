@@ -33,6 +33,7 @@ player = {
 	moveQueue = { first = 0, last = 10 },
 	action,
 	prevYposition,
+	xInput,
 
 	-- temp variables
 	gravity
@@ -111,8 +112,8 @@ function player:draw( )
 
 	-- [ Dev Player Stats ]
 	love.graphics.printf( self.state, 10, 10, 150, 'left' )
-	love.graphics.printf( "velocity:  " .. self.velY, 10, 30, 550, 'left' )
-	love.graphics.printf( "acceleration:  " .. self.accY, 10, 50, 550, 'left' )
+	love.graphics.printf( "velocity:  " .. self.velX, 10, 30, 550, 'left' )
+	love.graphics.printf( "acceleration:  " .. self.accX, 10, 50, 550, 'left' )
 	love.graphics.printf( "speed:  " .. self.speed, 10, 70, 550, 'left' )
 
 	-- [Dev Player Info : right side ]
@@ -126,7 +127,7 @@ end
 
 function player:update( dt )
 	-- [ Joystick Motion ]
-	self.speed =  tonumber(self.charSheetArray["speed"]) * joystick:getAxis(1)
+	self.xInput =  self.speed * joystick:getAxis(1)
 	if joystick:getAxis(2) < -0.79 then --up
 		if self.state ~= 'jumping' and self.state ~= 'falling' then
 			self.state = 'jumping'
@@ -136,18 +137,49 @@ function player:update( dt )
 	if joystick:getAxis(2) > 0.65 then --down
 		self.velY = self.velY - 55
 	end
-	if joystick:getAxis(1) < 0 then --left
-		self.x = self.x + ( self.speed * dt )
+	if joystick:getAxis(1) < -0.17 then --left
+		if joystick:getAxis(1) > -0.35 and self.accX == 0 and self.velX == 0 then self.x = self.x + ( (self.speed * joystick:getAxis(1)) * dt ) 
+		elseif self.velX > self.speed * -1 then
+			if joystick:getAxis(1) > -0.85 then
+				self.accX = self.accX + ( self.xInput * dt ) * 2
+			else
+				if math.abs(self.velX) < self.speed * 0.85 and self.accX == 0 then self.velX = self.speed * -0.85 end 
+				self.accX = self.accX + ( self.xInput * dt ) * 50
+			end
+		end
 		if self.state ~= "jumping" and self.state ~= 'falling' then
 			self.facing = "left"
 		end
-
 	end
-	if joystick:getAxis(1) > 0 then --right
-		self.x = self.x + ( self.speed * dt )
+	if joystick:getAxis(1) > 0.17 then --right
+		if joystick:getAxis(1) < 0.35 and self.accX == 0 and self.velX == 0 then self.x = self.x + ( (self.speed * joystick:getAxis(1)) * dt ) 
+		elseif self.velX < self.speed then
+			if joystick:getAxis(1) < 0.85 then
+				self.accX = self.accX + ( self.xInput * dt ) * 2
+			else
+				if math.abs(self.velX) < self.speed * 0.85 and self.accX == 0 then self.velX = self.speed * 0.85 end 
+				self.accX = self.accX + ( self.xInput * dt ) * 50
+			end
+		end
 		if self.state ~= "jumping" and self.state ~= 'falling' then	
 			self.facing = "right"
 		end
+	end
+
+	-- stop player at joystick neutral position.
+	if joystick:getAxis(1) >= -0.35 and joystick:getAxis(1) <= 0.35  and self.velX ~= 0 and self.state ~= "jumping" and self.state ~= "falling" then
+		--bring player to hault.
+		if math.abs(self.velX) <= self.speed * 0.35 then
+			self.velX = 0
+			self.accX = 0
+		end
+
+		if self.velX > 0 then
+			self.accX = self.accX - ( (self.velX * 20) * dt )
+		else
+			self.accX = self.accX - ( (self.velX * 20) * dt )
+		end
+
 	end
 
 	-- [Joystick Input]
@@ -181,10 +213,10 @@ function player:update( dt )
 
 		-- back jump resistance
 		if joystick:getAxis(1) < 0 and self.facing == "right" then
-			self.speed = 7
+			--
 		end
 		if joystick:getAxis(1) > 0 and self.facing == "left" then
-			self.speed = 7
+			--
 		end
 	end 
 		-- reset to idle
@@ -198,6 +230,13 @@ function player:update( dt )
 	if self.playAnimation == true then
 		self.sprite:update(dt)
 	end
+
+	-- limit speed and acceleration
+	if self.velX > self.speed then self.velX = self.speed; self.accX = 0 end
+	if self.velX < self.speed * -1 then self.velX = self.speed * -1; self.accX = 0 end
+	
+	self.velX = self.velX + ( self.accX * dt )
+	self.x = self.x + ( self.velX * dt )
 
 	self:performAction(self.action)
 
