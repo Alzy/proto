@@ -1,6 +1,6 @@
 --HC = require "hardoncollider"
 require "AnAL"
-require "player2"
+require "player"
 
 function love.load(  )
 	SCREEN_WIDTH = love.graphics.getWidth()

@@ -1,4 +1,4 @@
 @echo off
-cd "C:\Users\Alzy101\Desktop"
+cd "C:\Users\Alfredo\Desktop"
 "C:\Program Files\LOVE\love.exe" proto
 
