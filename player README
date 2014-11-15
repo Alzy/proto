@@ -1,18 +1,24 @@
 [ Possible States ]
 
-Player states (player.state) holds the current state of the player. For conditional moves. 
+Player states (player.state) holds the current state of the character. For conditional moves. 
 
-idle
-jumping
-falling
-hit
-attacking
-blocking
+idle:
+jumping:
+falling:
 
+attacking:
+blocking:
+
+hit:
+helpless:
+hopeless:
+
+null:
 
 [ Player Speeds ]
 
-walking: 200
-running: 255
-sprinting: 325
-s sprint: 350
+crawling 		-- maybe
+crouching: 		up to 25% speed
+walking: 		up to 35% speed
+running: 		up to 85% speed
+sprinting: 		up to 100% speed
