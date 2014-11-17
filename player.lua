@@ -126,61 +126,57 @@ function player:draw( )
 end
 
 function player:update( dt )
-	-- [ Joystick Motion ]
+
 	self.xInput =  self.speed * joystick:getAxis(1)
-	if joystick:getAxis(2) < -0.79 then --up
-		if self.state ~= 'jumping' and self.state ~= 'falling' then
-			self.state = 'jumping'
-			self.velY = tonumber(self.charSheetArray["jumpVel"])  -- must be variable per character
-		end
-	end
-	if joystick:getAxis(2) > 0.65 then --down
-		self.velY = self.velY - 55
-	end
-	if joystick:getAxis(1) < -0.17 then --left
-		if joystick:getAxis(1) > -0.35 and self.accX == 0 and self.velX == 0 then self.x = self.x + ( (self.speed * joystick:getAxis(1)) * dt ) 
-		elseif self.velX > self.speed * -1 then
-			if joystick:getAxis(1) > -0.85 then
-				self.accX = self.accX + ( self.xInput * dt ) * 2
-			else
-				if math.abs(self.velX) < self.speed * 0.85 and self.accX == 0 then self.velX = self.speed * -0.85 end 
-				self.accX = self.accX + ( self.xInput * dt ) * 50
+	-- UP
+		if joystick:getAxis(2) < -0.79 then
+			if self.state ~= 'jumping' and self.state ~= 'falling' then
+				self.state = 'jumping'
+				self.velY = tonumber(self.charSheetArray["jumpVel"])  -- must be variable per character
 			end
 		end
-		if self.state ~= "jumping" and self.state ~= 'falling' then
-			self.facing = "left"
+	-- DOWN
+		if joystick:getAxis(2) > 0.65 then
+			self.velY = self.velY - 55 -- must be the product of delta time.
 		end
-	end
-	if joystick:getAxis(1) > 0.17 then --right
-		if joystick:getAxis(1) < 0.35 and self.accX == 0 and self.velX == 0 then self.x = self.x + ( (self.speed * joystick:getAxis(1)) * dt ) 
-		elseif self.velX < self.speed then
-			if joystick:getAxis(1) < 0.85 then
-				self.accX = self.accX + ( self.xInput * dt ) * 2
-			else
-				if math.abs(self.velX) < self.speed * 0.85 and self.accX == 0 then self.velX = self.speed * 0.85 end 
-				self.accX = self.accX + ( self.xInput * dt ) * 50
+
+	-- LEFT AND RIGHT
+		local joystickXpos = joystick:getAxis(1)
+	-- POSITION 1 (walk)
+		if math.abs(joystickXpos) > 0.17 and math.abs(joystickXpos) < 0.35 then
+			-- if on the ground and accX == 0 & velX == 0
+			self.x = self.x + ( self.xInput * dt )
+	-- POSTITION 2 (run)
+		elseif math.abs(joystickXpos) >= 0.35 and math.abs(joystickXpos) < 0.85 then
+			-- on ground
+			if self.velX == 0 and self.accX == 0 then self.velX = self.xInput end
+			if self.accX < 200 /2 then self.accX = self.accX + ( (self.xInput * 2) * dt ) end
+	-- POSITION 3 (sprint)
+		elseif math.abs(joystickXpos) >= 0.85 then
+			-- on ground
+			if self.velX == 0 and self.accX == 0 then self.velX = self.xInput end
+			if self.accX < 350 /2 then self.accX = self.accX + ( (self.xInput * 2) * dt ) end
+		end
+
+	-- limit speed and acceleration
+		if self.velX > self.speed then self.velX = self.speed; self.accX = 0 end
+		if self.velX < self.speed * -1 then self.velX = self.speed * -1; self.accX = 0 end
+
+
+	-- STOP PLAYER AT NEUTRAL POSITION.
+		if math.abs(joystickXpos) < 0.35  and self.velX ~= 0 and self.state ~= "jumping" and self.state ~= "falling" then
+			--bring player to hault.
+			if math.abs(self.velX) <= self.speed * 0.2 then
+				self.velX = 0
+				self.accX = 0
 			end
-		end
-		if self.state ~= "jumping" and self.state ~= 'falling' then	
-			self.facing = "right"
-		end
-	end
 
-	-- stop player at joystick neutral position.
-	if joystick:getAxis(1) >= -0.35 and joystick:getAxis(1) <= 0.35  and self.velX ~= 0 and self.state ~= "jumping" and self.state ~= "falling" then
-		--bring player to hault.
-		if math.abs(self.velX) <= self.speed * 0.35 then
-			self.velX = 0
-			self.accX = 0
+			if math.abs(self.velX) > 0 then
+				self.accX = self.accX - ( (self.velX * 20) * dt )
+			end
+
 		end
 
-		if self.velX > 0 then
-			self.accX = self.accX - ( (self.velX * 20) * dt )
-		else
-			self.accX = self.accX - ( (self.velX * 20) * dt )
-		end
-
-	end
 
 	-- [Joystick Input]
 	if joystick:isDown(11) then  -- see "joystick list of button indexs.txt"
@@ -219,17 +215,16 @@ function player:update( dt )
 		self.y = 215 -- lol
 	end
 
-	if self.playAnimation == true then
-		self.sprite:update(dt)
-	end
 
-	-- limit speed and acceleration
-	if self.velX > self.speed then self.velX = self.speed; self.accX = 0 end
-	if self.velX < self.speed * -1 then self.velX = self.speed * -1; self.accX = 0 end
 	-- update velocity
 	self.velX = self.velX + ( self.accX * dt )
 	-- update player x location
 	self.x = self.x + ( self.velX * dt )
+
+
+	if self.playAnimation == true then
+		self.sprite:update(dt)
+	end
 
 	self:performAction(self.action)
 
