@@ -147,21 +147,17 @@ function player:update( dt )
 			-- if on the ground and accX == 0 & velX == 0
 			self.x = self.x + ( self.xInput * dt )
 	-- POSTITION 2 (run)
-		elseif math.abs(joystickXpos) >= 0.35 and math.abs(joystickXpos) < 0.85 then
+		elseif math.abs(joystickXpos) >= 0.35 then
 			-- on ground
-			if self.velX == 0 and self.accX == 0 then self.velX = self.xInput end
-			if self.accX < 200 /2 then self.accX = self.accX + ( (self.xInput * 2) * dt ) end
-	-- POSITION 3 (sprint)
-		elseif math.abs(joystickXpos) >= 0.85 then
-			-- on ground
-			if self.velX == 0 and self.accX == 0 then self.velX = self.xInput end
-			if self.accX < 350 /2 then self.accX = self.accX + ( (self.xInput * 2) * dt ) end
+			if self.velX == 0 and self.accX == 0 then self.velX = self.xInput; self.accX = self.xInput end
+			if math.abs(self.accX) < self.speed then self.accX = self.accX + ( (self.xInput * 2) * dt ) else self.accX = self.speed * self:polarity(self.accX)  end
+			if math.abs(self.velX) > self.speed then self.velX = self.speed * self:polarity(self.velX) end
+			if math.abs(self.velX) >= self.speed then self.accX = 0 end
+
+			if self:polarity(joystickXpos) ~= self:polarity(self.velX) and math.abs(self.velX) > self.speed * .25 then self.velX = self.velX * .5; self.accX = self.accX + (self.speed * 0.35) * self:polarity(joystickXpos)  end
+			if math.abs(self.velX) < self.speed * 0.35 then self.velX = self.velX + (self.speed * 0.35) * self:polarity(joystickXpos) end
+			if math.abs(self.velX) < self.speed * 0.5 then self.accX = self.accX + (self.accX * 0.1) end
 		end
-
-	-- limit speed and acceleration
-		if self.velX > self.speed then self.velX = self.speed; self.accX = 0 end
-		if self.velX < self.speed * -1 then self.velX = self.speed * -1; self.accX = 0 end
-
 
 	-- STOP PLAYER AT NEUTRAL POSITION.
 		if math.abs(joystickXpos) < 0.35  and self.velX ~= 0 and self.state ~= "jumping" and self.state ~= "falling" then
@@ -206,6 +202,7 @@ function player:update( dt )
 		self.velY = self.velY + ( self.accY * dt )
 		--update position
 		self.y = self.y - self.velY * dt
+
 	end 
 		-- reset to idle
 	if self.y >= 215 then
@@ -227,6 +224,10 @@ function player:update( dt )
 	end
 
 	self:performAction(self.action)
+
+	-- HACKS (things are getting messy.)
+	if( self.x > 640 ) then self.x = -72 end
+	if( self.x < -72 ) then self.x = 640 end
 
 	-- [ Hitbox Position and Movement ]
 	--self.hitbox:moveTo( self.hitbox_x, self.hitbox_y)
@@ -260,4 +261,14 @@ end
 function player.moveQueue:toString()
 	-- body
 	-- return formatted string ie: "UpDownPunchPunchDownKick" , "UDPPDK"
+end
+
+
+
+
+-- HELPER FUNCTIONS
+
+function player:polarity( num )
+	-- returns -1 for negative. 1 for positive. 0 for 0.
+	if num > 0 then return 1 elseif num < 0 then return -1 else return 0 end
 end

@@ -17,6 +17,8 @@ function player:weakPunch( frames )
 
 	pressed = self.sprite:getCurrentFrame()
 
+	
+
 	if self.sprite:getCurrentFrame() == 5 then
 		self.playerState = "idle"
 		self.playAnimation = false
