@@ -16,7 +16,6 @@ function player:weakPunch( frames )
 	end
 
 	pressed = self.sprite:getCurrentFrame()
-
 	
 
 	if self.sprite:getCurrentFrame() == 5 then

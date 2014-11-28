@@ -11,17 +11,14 @@ function love.load(  )
 	--Collider = HC(100, onCollision, collision_stop)
 	--rect = Collider:addRectangle(175, 40,40,100)
 
-	-- Joysticks
-	local joysticks = love.joystick.getJoysticks()
-	joystick = joysticks[1]
-
 	--TIMER STUFF
 	Clock = love.timer.getTime()
 
+	-- Joysticks
+	joysticks = love.joystick.getJoysticks()
 
 	--LOAD TABLES
-	player:load()
-	player.moveQueue:push( ":P" )
+	player:load( joysticks[1] )
 
 	--LOAD BG
 	bgLayer0 = love.graphics.newImage("bg/bg.jpg")
@@ -31,7 +28,7 @@ function love.load(  )
 end
 
 function love.draw(  )
-
+	local joystick = joysticks[1]
 	--graphics
     love.graphics.draw(bgLayer0, 0, 0)
 	player:draw()
@@ -53,7 +50,7 @@ function love.draw(  )
 end
 
 function love.update ( dt )
-	player:update( dt )
+	player:update( dt, joysticks[1] )
 	--Collider:update( dt )
 end
 

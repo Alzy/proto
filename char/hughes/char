@@ -1,7 +1,7 @@
 # Character Variable Sheet
 #
 # Creating a character starts here. This file contains all variables variable per character.  <-lol
-# DO NOT remove an entry. Comment lines are #. assignment is done with =, left side is name, right side is value.
+# DO NOT remove an entry. Comment lines are # and must be placed at the beginning of the line! assignment is done with =, left side is name, right side is value.
 
 
 # [Player Info]
