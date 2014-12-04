@@ -13,3 +13,16 @@
 13 : ■
 14 : ▲
 15 : PS
+
+[ FAKE INDEXS FOR ANALOG STICKS AND TRIGGERS ]
+
+16: left analog up
+17: left analog down
+18: left analog left
+19: left analog right
+20: right analog up
+21: right analog down
+22: right analog left
+23: right analog right
+24: L2
+25: R2

@@ -6,6 +6,7 @@ player = {
 	-- [Player Info]
 	name,
 	facing,
+	permissions = {},
 
 	-- [Player Graphics]
 	sprite,
@@ -35,7 +36,7 @@ player = {
 	action,
 	prevYposition,
 	xInput,
-	buttonState = { 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 }, -- 15 slots for the 15 button indexs.
+	buttonState = { 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 }, -- 25 slots for 15 button indexs and 10 fake ones.
 
 	-- temp variables
 	gravity
@@ -87,9 +88,6 @@ function player:load( joystick )
 	self.energy = tonumber(self.charSheetArray["energy"])
 	self.defense = tonumber(self.charSheetArray["defense"]) -- out of 3. where 1 is weak, 2 is well average, and 3 is strong.
 
-	-- [Temp constants and variables (for dev)]
-	self.gravity = 4125
-
 	-- [Load Moveset]
 	require "char/hughes/moves"
 
@@ -98,6 +96,7 @@ function player:load( joystick )
 
 	-- [ Helpers ]
 	self.prevYposition = self.y
+	self.gravity = 4125
 
 	--self.hitbox_x = self.x + 12
 	--self.hitbox_y = self.y + 12
@@ -137,7 +136,6 @@ function player:update( dt, joystick )
 	if joystick:isDown(11) then  -- see "joystick list of button indexs.txt"
 		self.action = "punch -w"
 	end
-
 
 	-- [Player State Resolve]
 	if self.state == "idle" then
@@ -196,7 +194,6 @@ end
 
 
 
-
 -- [ Joystick Input Handling ]
 function player:handleInput( joystick )
 	--if self.buttonState[0] == nil then self.buttonState[0] = 0 end
@@ -207,6 +204,29 @@ function player:handleInput( joystick )
 		elseif self.buttonState[c] == 2 then
 			self.buttonState[c] = 0
 		end
+	end
+
+	-- get analog stick inputs
+	-- Right Stick
+	if joystick:getAxis(2) < -0.25 then -- up
+		if self.buttonState[16] < 2 then self.buttonState[16] = self.buttonState[16] + 1 end
+		if self.buttonState[16] == 1 then self.moveQueue:push(16) end
+	elseif joystick:getAxis(2) > 0.25 then -- down
+		if self.buttonState[17] < 2 then self.buttonState[17] = self.buttonState[17] + 1 end
+		if self.buttonState[17] == 1 then self.moveQueue:push(17) end
+	else
+		if self.buttonState[16] ~= 0 then self.buttonState[16] = 0 end
+		if self.buttonState[17] ~= 0 then self.buttonState[17] = 0 end
+	end
+	if joystick:getAxis(1) < -0.25 then -- left 
+		if self.buttonState[18] < 2 then self.buttonState[18] = self.buttonState[18] + 1 end
+		if self.buttonState[18] == 1 then self.moveQueue:push(18) end
+	elseif joystick:getAxis(1) > 0.25 then -- right
+		if self.buttonState[19] < 2 then self.buttonState[19] = self.buttonState[19] + 1 end
+		if self.buttonState[19] == 1 then self.moveQueue:push(19) end
+	else
+		if self.buttonState[18] ~= 0 then self.buttonState[18] = 0 end
+		if self.buttonState[19] ~= 0 then self.buttonState[19] = 0 end
 	end
 end
 
