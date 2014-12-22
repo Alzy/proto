@@ -1,7 +1,6 @@
 -- // THE ALMIGHTY PLAYER SCRIPT \\
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 player = {
 	-- [Player Info]
 	name,
@@ -30,16 +29,21 @@ player = {
 	defense,
 
 	-- [Helpers]
+	-- character
 	charsheet,
 	charSheetArray,
+	-- joystick
+	buttonState     = { 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 }, -- { 25 slots for 15 button indexs and 10 fake ones.
+	buttonHoldTime  = { 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 }, -- { I'd make a multi-dem array, but fuck it.
+	buttonPressTime = { 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 }, -- { this feels most readable
+	xInput,
+	-- action
 	moveQueue = { first = 0, last = 10 },
 	action,
 	prevYposition,
-	xInput,
-	buttonState = { 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 }, -- 25 slots for 15 button indexs and 10 fake ones.
 
 	-- temp variables
-	gravity
+	gravity -- delete later. This is a spec relative to map.
 
 } --CREATE PLAYER TABLE
 
@@ -57,7 +61,7 @@ function player:load( joystick )
 			line = line:gsub("%s+", "")
 			if line:find("=") ~= nil then
 				-- populate array  ( Character["name"] = far )
-				self.charSheetArray[line:sub( 1, line:find("=")-  1 )] = line:sub(line:find("=") + 1)
+				self.charSheetArray[line:sub( 1, line:find("=") - 1 )] = line:sub(line:find("=") + 1)
 			end
 		end
 	end
@@ -117,20 +121,24 @@ function player:draw( )
 	love.graphics.printf( "acceleration:  " .. self.accX, 10, 50, 550, 'left' )
 	love.graphics.printf( "speed:  " .. self.speed, 10, 70, 550, 'left' )
 
-	-- [Dev Player Info : right side ]
+	-- [ Dev Player Info : right side ]
 	love.graphics.printf( "name :  " .. self.name, 550, 10, 150, 'left' )
 	love.graphics.printf( "facing:  " .. self.facing, 550, 30, 150, 'left' )
 	love.graphics.printf( "HP:  " .. self.hp, 550, 50, 150, 'left' )
 	love.graphics.printf( "Energy:  " .. self.energy, 550, 70, 150, 'left' )
 
+	-- [ Dev MoveQueue Info ]
 	self.moveQueue:draw()
+	love.graphics.printf( "Hold: " .. self.buttonHoldTime[25] , 550, 300, 20, 'left'  )
+	love.graphics.printf( "Pressed: " .. self.buttonPressTime[25], 550, 320, 20, 'left' )
+	-- [ Dev Draw Hitbox ]
 	-- self.hitbox:draw("fill")
 end
 
 function player:update( dt, joystick )
 
 	self:handleFootMovement(dt, joystick)
-	self:handleInput(joystick)
+	self:handleInput(dt, joystick)
 
 	-- [Joystick Input]
 	if joystick:isDown(11) then  -- see "joystick list of button indexs.txt"
@@ -141,7 +149,6 @@ function player:update( dt, joystick )
 	if self.state == "idle" then
 		self.velY = 0
 		self.accY = 0
-		--self.speed = tonumber(self.charSheetArray["speed"])
 	end
 
 	if self.y > self.prevYposition then
@@ -152,7 +159,7 @@ function player:update( dt, joystick )
 	end
 
 	if self.state == 'jumping' or self.state == 'falling' then
- 		self.accX = 0 -- you can't accelerate when you jump, stupid. (unless you buy a jet pack.. gnarly.)
+ 		self.accX = 0 -- you can't accelerate when you jump, stupid.
 		
 		-- jump
 		--apply gravity
@@ -183,7 +190,7 @@ function player:update( dt, joystick )
 
 	self:performAction(self.action)
 
-	-- HACKS (things are getting messy.)
+	-- HACKS (things are getting messy.) delete later
 	-- pacman screen corners
 	if( self.x > 640 ) then self.x = -72 end
 	if( self.x < -72 ) then self.x = 640 end
@@ -195,8 +202,7 @@ end
 
 
 -- [ Joystick Input Handling ]
-function player:handleInput( joystick )
-	--if self.buttonState[0] == nil then self.buttonState[0] = 0 end
+function player:handleInput( dt, joystick )
 	for c = 1, 15 do
 		if joystick:isDown(c) then
 			if self.buttonState[c] < 2 then self.buttonState[c] = self.buttonState[c] + 1 end
@@ -205,9 +211,36 @@ function player:handleInput( joystick )
 			self.buttonState[c] = 0
 		end
 	end
+	--FOR TESTING delete later
+	if love.keyboard.isDown("o") then
+		if self.buttonState[24] < 2 then 
+			self.buttonState[24] = self.buttonState[24] + 1
+			if self.buttonState[24] == 1 then 
+				self.moveQueue:push(24)
+				self.buttonPressTime[24] = Clock -- set to match time.
+			end
+		else self.buttonHoldTime[24] = self.buttonHoldTime[24] + dt end
+	elseif self.buttonState[24] == 2 then
+		self.buttonState[24] = 0
+		self.buttonHoldTime[24] = 0
+	end
+	--FOR TESTING delete later
+	if love.keyboard.isDown("p") then
+		if self.buttonState[25] < 2 then 
+			self.buttonState[25] = self.buttonState[25] + 1
+			if self.buttonState[25] == 1 then 
+				self.moveQueue:push(25)
+				self.buttonPressTime[25] = Clock -- set to match time.
+			end
+		else self.buttonHoldTime[25] = self.buttonHoldTime[25] + dt end
+	elseif self.buttonState[25] == 2 then
+		self.buttonState[25] = 0
+		self.buttonHoldTime[25] = 0
+	end
+
 
 	-- get analog stick inputs
-	-- Right Stick
+	-- Left Stick
 	if joystick:getAxis(2) < -0.25 then -- up
 		if self.buttonState[16] < 2 then self.buttonState[16] = self.buttonState[16] + 1 end
 		if self.buttonState[16] == 1 then self.moveQueue:push(16) end

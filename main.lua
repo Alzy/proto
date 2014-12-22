@@ -11,13 +11,13 @@ function love.load(  )
 	--Collider = HC(100, onCollision, collision_stop)
 	--rect = Collider:addRectangle(175, 40,40,100)
 
-	--TIMER STUFF
-	Clock = love.timer.getTime()
+	-- GAME TIMER
+	Clock = 0
 
-	-- Joysticks
+	-- JOYSTICKS
 	joysticks = love.joystick.getJoysticks()
 
-	--LOAD TABLES
+	--LOAD PLAYER TABLES
 	player:load( joysticks[1] )
 
 	--LOAD BG
@@ -50,6 +50,7 @@ function love.draw(  )
 end
 
 function love.update ( dt )
+	Clock = Clock + dt
 	player:update( dt, joysticks[1] )
 	--Collider:update( dt )
 end
