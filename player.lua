@@ -35,7 +35,6 @@ player = {
 	-- joystick
 	buttonState     = { 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 }, -- { 25 slots for 15 button indexs and 10 fake ones.
 	buttonHoldTime  = { 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 }, -- { I'd make a multi-dem array, but fuck it.
-	buttonPressTime = { 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0 }, -- { this feels most readable
 	xInput,
 	-- action
 	moveQueue = { first = 0, last = 10 },
@@ -130,7 +129,6 @@ function player:draw( )
 	-- [ Dev MoveQueue Info ]
 	self.moveQueue:draw()
 	love.graphics.printf( "Hold: " .. self.buttonHoldTime[25] , 550, 300, 20, 'left'  )
-	love.graphics.printf( "Pressed: " .. self.buttonPressTime[25], 550, 320, 20, 'left' )
 	-- [ Dev Draw Hitbox ]
 	-- self.hitbox:draw("fill")
 end
@@ -206,7 +204,7 @@ function player:handleInput( dt, joystick )
 	for c = 1, 15 do
 		if joystick:isDown(c) then
 			if self.buttonState[c] < 2 then self.buttonState[c] = self.buttonState[c] + 1 end
-			if self.buttonState[c] == 1 then self.moveQueue:push(c) end
+			if self.buttonState[c] == 1 then self.moveQueue:push(c,Clock) end
 		elseif self.buttonState[c] == 2 then
 			self.buttonState[c] = 0
 		end
@@ -216,8 +214,7 @@ function player:handleInput( dt, joystick )
 		if self.buttonState[24] < 2 then 
 			self.buttonState[24] = self.buttonState[24] + 1
 			if self.buttonState[24] == 1 then 
-				self.moveQueue:push(24)
-				self.buttonPressTime[24] = Clock -- set to match time.
+				self.moveQueue:push(24,Clock)
 			end
 		else self.buttonHoldTime[24] = self.buttonHoldTime[24] + dt end
 	elseif self.buttonState[24] == 2 then
@@ -229,8 +226,7 @@ function player:handleInput( dt, joystick )
 		if self.buttonState[25] < 2 then 
 			self.buttonState[25] = self.buttonState[25] + 1
 			if self.buttonState[25] == 1 then 
-				self.moveQueue:push(25)
-				self.buttonPressTime[25] = Clock -- set to match time.
+				self.moveQueue:push(25,Clock)
 			end
 		else self.buttonHoldTime[25] = self.buttonHoldTime[25] + dt end
 	elseif self.buttonState[25] == 2 then
@@ -243,20 +239,20 @@ function player:handleInput( dt, joystick )
 	-- Left Stick
 	if joystick:getAxis(2) < -0.25 then -- up
 		if self.buttonState[16] < 2 then self.buttonState[16] = self.buttonState[16] + 1 end
-		if self.buttonState[16] == 1 then self.moveQueue:push(16) end
+		if self.buttonState[16] == 1 then self.moveQueue:push(16,Clock) end
 	elseif joystick:getAxis(2) > 0.25 then -- down
 		if self.buttonState[17] < 2 then self.buttonState[17] = self.buttonState[17] + 1 end
-		if self.buttonState[17] == 1 then self.moveQueue:push(17) end
+		if self.buttonState[17] == 1 then self.moveQueue:push(17,Clock) end
 	else
 		if self.buttonState[16] ~= 0 then self.buttonState[16] = 0 end
 		if self.buttonState[17] ~= 0 then self.buttonState[17] = 0 end
 	end
 	if joystick:getAxis(1) < -0.25 then -- left 
 		if self.buttonState[18] < 2 then self.buttonState[18] = self.buttonState[18] + 1 end
-		if self.buttonState[18] == 1 then self.moveQueue:push(18) end
+		if self.buttonState[18] == 1 then self.moveQueue:push(18,Clock) end
 	elseif joystick:getAxis(1) > 0.25 then -- right
 		if self.buttonState[19] < 2 then self.buttonState[19] = self.buttonState[19] + 1 end
-		if self.buttonState[19] == 1 then self.moveQueue:push(19) end
+		if self.buttonState[19] == 1 then self.moveQueue:push(19,Clock) end
 	else
 		if self.buttonState[18] ~= 0 then self.buttonState[18] = 0 end
 		if self.buttonState[19] ~= 0 then self.buttonState[19] = 0 end
@@ -321,18 +317,21 @@ end
 
 -- [ MOVEMENT QUEUE FUNCTIONS ]
 function player.moveQueue:load()
-	self[0] = "-"
 	for i = 0, self.last do
-		self[i] = "-"
+		self[i] = {}
+		self[i][0] = "-"
+		self[i][1] = "-"
 	end
 end
 
-function player.moveQueue:push( action_ )
+function player.moveQueue:push( action_, time_ )
 	if( action_ ~= nil ) then
 		for i = 0, self.last - 1 do 
-			self[self.last - i] = self[self.last - i - 1]
+			self[self.last - i][0] = self[self.last - i - 1][0]
+			self[self.last - i][1] = self[self.last - i - 1][1]
 		end
-			self[0] = action_
+			self[0][0] = action_
+			self[0][1] = time_
 	end
 end
 
@@ -342,7 +341,10 @@ end
 
 function player.moveQueue:draw()
 	for i = 0 , self.last - 1 do 
-		love.graphics.printf( i .. ": " .. self[i], 550, 100 + ( i * 20 ), 100, 'left' )
+		love.graphics.printf( i .. ": " .. self[i][0], 550, 100 + ( i * 20 ), 100, 'left' )
+		if self[i][1] ~= "-" then
+			love.graphics.printf( (math.floor(self[i][1]*10)*0.1), 590, 100 + ( i * 20 ), 100, 'left' )
+		else love.graphics.printf( "-", 590, 100 + ( i * 20 ), 100, 'left' ) end
 	end
 end
 
